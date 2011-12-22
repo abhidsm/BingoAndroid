@@ -1,10 +1,12 @@
 package com.bingo;
 
-import java.util.Arrays;
 import java.util.Random;
 
 import android.content.Context;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
@@ -18,9 +20,11 @@ public class Game extends View {
 	private int width;
 	private Paint paintTool;
 	private Cell[][] elements = null;
+	private Context context;
 	
 	public Game(Context context) {
 		super(context);
+		this.context = context;
 		this.setBackgroundColor(Color.WHITE);
 		paintTool = new Paint();
         this.paintTool.setARGB(255, 0, 0, 0);
@@ -41,7 +45,12 @@ public class Game extends View {
         		elements[i][j] = new Cell(cellHeight * j, cellWidth * i);
         	}
         }
-        createBoard();
+        Board newBoard = new Board(rowCount, columnCount);
+        for(int i=0; i < rowCount; i++){
+        	for(int j=0; j < columnCount; j++){
+        		elements[i][j].number = newBoard.elements[i][j];
+        	}
+        }        
 	}
 	
 	 @Override
@@ -63,26 +72,48 @@ public class Game extends View {
              super.onDraw(canvas);
      }
 	 
-	 private void createBoard(){
-		 int[] numArr = new int[25];
-		 Random randomGenerator = new Random();
-		 int randomInt = randomGenerator.nextInt(25);
-		 for(int i=0; i <= 25-randomInt; i++){
-			 numArr[i] = i+randomInt;
-		 }
-		 for(int i=25-randomInt+1; i < 25; i++){
-			 numArr[i] = i-(25-randomInt);
-		 }
-		 
-		 for(int i=0; i < rowCount; i++){
-			 for(int j=0; j < columnCount; j++){
-				 if(randomInt%2==0){
-					 elements[i][j].number = numArr[(i*rowCount)+(j)];
-				 }else{
-					 elements[j][i].number = numArr[(i*rowCount)+(j)];
+	 @Override
+     public boolean onTouchEvent(MotionEvent event) {
+             int x_aux = (int) (event.getX() / (this.getWidth() / rowCount));
+             int y_aux = (int) (event.getY() / (this.getHeight() / columnCount));
+             elements[y_aux][x_aux].status = 1;
+             //Log.d("Bingo","Touched on x: "+String.valueOf(x_aux)+", y: "+String.valueOf(y_aux));
+             this.invalidate();
+             Toast.makeText(context, "You have selected "+ String.valueOf(elements[y_aux][x_aux].number), Toast.LENGTH_SHORT).show();
+             selectANumber();
+             return false;
+     }
+	 
+	 private void selectANumber(){
+		 int[] notSelectedNumbers = new int[25];
+		 int count = 0;
+		 for(int i=0;i<rowCount;i++){
+			 for(int j=0;j<columnCount;j++){
+				 if(elements[i][j].status == Cell.NOT_SELECTED){
+					 notSelectedNumbers[count] = elements[i][j].number;
+					 count++;
 				 }
 			 }
 		 }
+		 if(count >0){
+			 Random randomGenerator = new Random();
+			 int randomInt = randomGenerator.nextInt(count);
+			 int selectedNumber = notSelectedNumbers[randomInt];
+			 
+			 int posX=0, posY=0;
+			 for(int i=0;i<rowCount;i++){
+				 for(int j=0;j<columnCount;j++){
+					 if(elements[i][j].number == selectedNumber){
+						 posX = i;
+						 posY = j;
+					 }
+				 }
+			 }
+	         Toast.makeText(context, "I have selected "+ String.valueOf(selectedNumber), Toast.LENGTH_SHORT).show();
+			 elements[posX][posY].status = 1;
+	         this.invalidate();
+         }
 	 }
+	 
 	
 }
