@@ -3,5 +3,6 @@
 
     <string name="hello">Hello World, BingoActivity!</string>
     <string name="app_name">Bingo</string>
+    <string name="new_game">New Game</string>
 
 </resources>

@@ -88,34 +88,32 @@ public class Game extends View {
             	 //Toast.makeText(context, "You have selected "+ String.valueOf(elements[y_aux][x_aux].number), Toast.LENGTH_SHORT).show();
                  int totalLines = markTheLine();
             	 this.invalidate();
-            	 int selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
-                 if(totalLines == rowCount){
-                	 gameOver = true;
-                     if(selectedNumbersCount >= EASY_MODE){
-                    	 Toast.makeText(context, "Oops! Its a draw. Try Again!", 100).show();
-                     }else{
-                    	 Toast.makeText(context, "Congrats! You win. Can you win again?", 100).show();
-                     }
-                 }else{
+            	 if(!isGameOver(totalLines)){
                 	 selectANumber();
                 	 totalLines = markTheLine();
                 	 this.invalidate();
-                	 selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
-                	 if(selectedNumbersCount >= EASY_MODE){
-                    	 gameOver = true;
-                         if(totalLines == rowCount){
-                        	 Toast.makeText(context, "Oops! Its a draw. Try Again!", 100).show();
-                         }else{
-                        	 Toast.makeText(context, "Sorry! You loose. Try Again!", 100).show();
-                         }
-                	 }
+                	 isGameOver(totalLines);
                  }
              }
 		 }
 		 return false;
      }
 	 
-	 
+	 private boolean isGameOver(int totalLines){
+    	 int selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
+         if(totalLines == rowCount){
+        	 gameOver = true;
+             if(selectedNumbersCount >= EASY_MODE){
+            	 Toast.makeText(context, "Oops! Its a draw. Try Again!", Toast.LENGTH_LONG).show();
+             }else{
+            	 Toast.makeText(context, "Congrats! You win. Can you win again?", Toast.LENGTH_LONG).show();
+             }
+         }else if(selectedNumbersCount >= EASY_MODE){
+        	 gameOver = true;
+        	 Toast.makeText(context, "Sorry! You loose. Try Again!", Toast.LENGTH_LONG).show();
+         }
+         return gameOver;
+	 }
 	 
 	 private void selectANumber(){
 		 int[] notSelectedNumbers = new int[25];
