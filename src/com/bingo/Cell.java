@@ -29,6 +29,8 @@ public class Cell extends Point{
         paintTool.setARGB(255, 0, 0, 0);
         //Log.d("Bingo","Touched on x: "+String.valueOf(x)+", y: "+String.valueOf(y));
         if(status == 1){
+            paintTool.setARGB(255, 0, 0, 255);
+        }else if(status == 2){
             paintTool.setARGB(255, 255, 0, 0);
         }
         g.drawText(String.valueOf(this.number), (x*w)+(w/10), (y*h)+(2*h/3), paintTool);

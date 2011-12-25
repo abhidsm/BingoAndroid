@@ -1,7 +1,6 @@
 package com.bingo;
 
 import java.util.Random;
-
 import android.content.Context;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -14,6 +13,11 @@ import android.graphics.Canvas;
 
 public class Game extends View {
 
+	public static final int EASY_MODE = 19;
+	public static final int MEDIUM_MODE = 18;
+	public static final int DIFFICULT_MODE = 17;
+	public static final int TOTAL_NUMBERS = 25;
+	
 	int rowCount = 5;
 	int columnCount = 5;
 	private int height;
@@ -21,6 +25,7 @@ public class Game extends View {
 	private Paint paintTool;
 	private Cell[][] elements = null;
 	private Context context;
+	boolean gameOver = false;
 	
 	public Game(Context context) {
 		super(context);
@@ -74,15 +79,43 @@ public class Game extends View {
 	 
 	 @Override
      public boolean onTouchEvent(MotionEvent event) {
+		 if(!gameOver){
              int x_aux = (int) (event.getX() / (this.getWidth() / rowCount));
              int y_aux = (int) (event.getY() / (this.getHeight() / columnCount));
-             elements[y_aux][x_aux].status = 1;
-             //Log.d("Bingo","Touched on x: "+String.valueOf(x_aux)+", y: "+String.valueOf(y_aux));
-             this.invalidate();
-             Toast.makeText(context, "You have selected "+ String.valueOf(elements[y_aux][x_aux].number), Toast.LENGTH_SHORT).show();
-             selectANumber();
-             return false;
+             if(elements[y_aux][x_aux].status == Cell.NOT_SELECTED){
+                 elements[y_aux][x_aux].status = Cell.SELECTED;
+                 //Log.d("Bingo","Touched on x: "+String.valueOf(x_aux)+", y: "+String.valueOf(y_aux));
+            	 //Toast.makeText(context, "You have selected "+ String.valueOf(elements[y_aux][x_aux].number), Toast.LENGTH_SHORT).show();
+                 int totalLines = markTheLine();
+            	 this.invalidate();
+            	 int selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
+                 if(totalLines == rowCount){
+                	 gameOver = true;
+                     if(selectedNumbersCount >= EASY_MODE){
+                    	 Toast.makeText(context, "Oops! Its a draw. Try Again!", 100).show();
+                     }else{
+                    	 Toast.makeText(context, "Congrats! You win. Can you win again?", 100).show();
+                     }
+                 }else{
+                	 selectANumber();
+                	 totalLines = markTheLine();
+                	 this.invalidate();
+                	 selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
+                	 if(selectedNumbersCount >= EASY_MODE){
+                    	 gameOver = true;
+                         if(totalLines == rowCount){
+                        	 Toast.makeText(context, "Oops! Its a draw. Try Again!", 100).show();
+                         }else{
+                        	 Toast.makeText(context, "Sorry! You loose. Try Again!", 100).show();
+                         }
+                	 }
+                 }
+             }
+		 }
+		 return false;
      }
+	 
+	 
 	 
 	 private void selectANumber(){
 		 int[] notSelectedNumbers = new int[25];
@@ -110,9 +143,81 @@ public class Game extends View {
 				 }
 			 }
 	         Toast.makeText(context, "I have selected "+ String.valueOf(selectedNumber), Toast.LENGTH_SHORT).show();
-			 elements[posX][posY].status = 1;
-	         this.invalidate();
+			 elements[posX][posY].status = Cell.SELECTED;
          }
+	 }
+	 
+	 public int markTheLine(){
+		 int totalLines = 0;
+		 int selectedCountInALine;
+		 for(int i=0;i<rowCount;i++){
+			 selectedCountInALine = 0;
+			 for(int j=0;j<columnCount;j++){
+				 if(elements[i][j].status != Cell.NOT_SELECTED){
+					 selectedCountInALine++;
+				 }
+			 }
+			 if(selectedCountInALine == columnCount){
+				 totalLines++;
+				 for(int j=0;j<columnCount;j++){
+					 elements[i][j].status = Cell.COMPLETED_A_LINE;
+				 }
+			 }
+
+			 selectedCountInALine = 0;
+			 for(int j=0;j<columnCount;j++){
+				 if(elements[j][i].status != Cell.NOT_SELECTED){
+					 selectedCountInALine++;
+				 }
+			 }
+			 if(selectedCountInALine == columnCount){
+				 totalLines++;
+				 for(int j=0;j<columnCount;j++){
+					 elements[j][i].status = Cell.COMPLETED_A_LINE;
+				 }
+			 }
+
+		 }
+		 
+		 selectedCountInALine = 0;
+		 for(int i=0;i<rowCount;i++){
+			 if(elements[i][i].status != Cell.NOT_SELECTED){
+				 selectedCountInALine++;
+			 }
+		 }
+		 if(selectedCountInALine == rowCount){
+			 totalLines++;
+			 for(int i=0;i<rowCount;i++){
+				 elements[i][i].status = Cell.COMPLETED_A_LINE;
+			 }
+		 }
+		 
+		 selectedCountInALine = 0;
+		 for(int i=0;i<rowCount;i++){
+			 if(elements[rowCount-(i+1)][i].status != Cell.NOT_SELECTED){
+				 selectedCountInALine++;
+			 }
+		 }
+		 if(selectedCountInALine == rowCount){
+			 totalLines++;
+			 for(int i=0;i<rowCount;i++){
+				 elements[rowCount-(i+1)][i].status = Cell.COMPLETED_A_LINE;
+			 }
+		 }
+		 
+		 return totalLines;
+	 }
+	 
+	 private int getNotSelectedNumbersCount(){
+		 int count = 0;
+		 for(int i=0;i<rowCount;i++){
+			 for(int j=0;j<columnCount;j++){
+				 if(elements[i][j].status == Cell.NOT_SELECTED){
+					 count++;
+				 }
+			 }
+		 }
+		 return count;
 	 }
 	 
 	
