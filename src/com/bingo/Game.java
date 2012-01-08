@@ -2,6 +2,7 @@ package com.bingo;
 
 import java.util.Random;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -101,18 +102,26 @@ public class Game extends View {
 	 
 	 private boolean isGameOver(int totalLines){
     	 int selectedNumbersCount = TOTAL_NUMBERS - getNotSelectedNumbersCount();
+    	 
          if(totalLines == rowCount){
         	 gameOver = true;
              if(selectedNumbersCount >= EASY_MODE){
-            	 Toast.makeText(context, "Oops! Its a draw. Try Again!", Toast.LENGTH_LONG).show();
+            	 BingoApplication.result = BingoApplication.TIE;
              }else{
-            	 Toast.makeText(context, "Congrats! You win. Can you win again?", Toast.LENGTH_LONG).show();
+            	 BingoApplication.result = BingoApplication.WIN;
              }
+             showResultPage();
          }else if(selectedNumbersCount >= EASY_MODE){
         	 gameOver = true;
-        	 Toast.makeText(context, "Sorry! You loose. Try Again!", Toast.LENGTH_LONG).show();
+        	 BingoApplication.result = BingoApplication.FAIL;
+        	 showResultPage();
          }
          return gameOver;
+	 }
+	 
+	 private void showResultPage(){
+		Intent intent = new Intent(this.getContext().getApplicationContext(), ResultActivity.class);
+		this.getContext().startActivity(intent);
 	 }
 	 
 	 private void selectANumber(){
